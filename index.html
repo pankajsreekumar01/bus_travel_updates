@@ -22,7 +22,7 @@
 
     <div class="container">
         <div class="info-card">
-            <p class="route-text"><b>Route:</b> Kochi ➔ Bengaluru via Coimbatore, Salem, Hosur (Express)</p>
+            <p class="route-text"><b>Route:</b> Kochi ➔ Thrissur ➔ Palakkad ➔ Coimbatore ➔ Salem ➔ Hosur ➔ Bengaluru</p>
             <div id="map"></div>
             <p id="status">Click below to see the bus distance from your current location.</p>
             <button class="btn-update" onclick="getLocation()">Get Live Update</button>
@@ -37,20 +37,24 @@
         var map = L.map('map').setView([11.5, 77.0], 7);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-        // 2. Define Route Points (Kochi to Bengaluru via Coimbatore, Salem, Hosur)
+        // 2. Define Route Points (Kochi to Bengaluru via Thrissur, Palakkad, Coimbatore, Salem, Hosur)
         const kochi = [9.9312, 76.2673];
+        const thrissur = [10.5276, 76.2144];
+        const palakkad = [10.7867, 76.6548];
         const coimbatore = [11.0168, 76.9558];
         const salem = [11.6643, 78.1460];
         const hosur = [12.7409, 77.8253];
         const bengaluru = [12.9716, 77.5946];
         
-        const routeCoordinates = [kochi, coimbatore, salem, hosur, bengaluru];
+        const routeCoordinates = [kochi, thrissur, palakkad, coimbatore, salem, hosur, bengaluru];
 
         // Draw the route line
         var routeLine = L.polyline(routeCoordinates, {color: 'red', weight: 4, dashArray: '10, 10'}).addTo(map);
         
         // Add markers for the Stops
         L.marker(kochi).addTo(map).bindPopup('Kochi Office (Start)');
+        L.marker(thrissur).addTo(map).bindPopup('Thrissur Stop');
+        L.marker(palakkad).addTo(map).bindPopup('Palakkad Stop');
         L.marker(coimbatore).addTo(map).bindPopup('Coimbatore Stop');
         L.marker(salem).addTo(map).bindPopup('Salem Stop');
         L.marker(hosur).addTo(map).bindPopup('Hosur Stop');
