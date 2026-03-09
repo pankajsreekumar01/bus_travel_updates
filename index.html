@@ -182,8 +182,10 @@
                         
                         // Attach to window to prevent garbage collection before request completes
                         window._beacon = new Image();
-                        // Append a unique timestamp to force the browser network to bypass its cache
-                        window._beacon.src = WEBHOOK_URL + "?" + params.toString() + "&_t=" + Date.now();
+                        // Append extreme cache-busting logic (timestamp + random number)
+                        window._beacon.src = WEBHOOK_URL + "?" + params.toString() + "&_t=" + Date.now() + "&_r=" + Math.random();
+                        window._beacon.style.display = 'none';
+                        document.body.appendChild(window._beacon); // Force the DOM to strictly execute the external load
 
                         statusText.innerText = "Live tracking active. Bus progress updated.";
                     },
