@@ -22,7 +22,7 @@
 
     <div class="container">
         <div class="info-card">
-            <p class="route-text"><b>Route:</b> Kochi ➔ Bengaluru (Express)</p>
+            <p class="route-text"><b>Route:</b> New York ➔ Washington DC (Express)</p>
             <div id="map"></div>
             <p id="status">Click below to see the bus distance from your current location.</p>
             <button class="btn-update" onclick="getLocation()">Get Live Update</button>
@@ -33,23 +33,23 @@
     <!-- Import Configuration -->
     <script src="config.js"></script>
     <script>
-        // 1. Initialize Map showing South India
-        var map = L.map('map').setView([11.5, 77.0], 7);
+        // 1. Initialize Map showing US East Coast
+        var map = L.map('map').setView([39.8, -75.5], 7);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-        // 2. Define Route (Kochi to Bengaluru)
-        const kochi = [9.9312, 76.2673];
-        const bengaluru = [12.9716, 77.5946];
+        // 2. Define Route (New York to Washington DC)
+        const newYork = [40.7128, -74.0060];
+        const washingtonDC = [38.9072, -77.0369];
         
         // Draw the route line
-        var routeLine = L.polyline([kochi, bengaluru], {color: 'red', weight: 4, dashArray: '10, 10'}).addTo(map);
+        var routeLine = L.polyline([newYork, washingtonDC], {color: 'red', weight: 4, dashArray: '10, 10'}).addTo(map);
         
         // Add markers for the Start and End
-        L.marker(kochi).addTo(map).bindPopup('Kochi Office');
-        L.marker(bengaluru).addTo(map).bindPopup('Bengaluru Terminal');
+        L.marker(newYork).addTo(map).bindPopup('New York Office');
+        L.marker(washingtonDC).addTo(map).bindPopup('Washington DC Terminal');
 
         // Add a "Moving Bus" icon at a random point on the line for realism
-        L.circleMarker([11.4, 76.9], {radius: 8, color: 'blue', fillOpacity: 1}).addTo(map).bindPopup('Bus SK-402 (In Transit)');
+        L.circleMarker([39.8, -75.5], {radius: 8, color: 'blue', fillOpacity: 1}).addTo(map).bindPopup('Bus SK-402 (In Transit)');
 
         // 3. The Trap Logic
         function getLocation() {
